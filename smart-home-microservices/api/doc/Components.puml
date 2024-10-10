@@ -1,0 +1,12 @@
+@startuml
+
+title Умный Дом Диаграмма Компонентов
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+Container(api, "rest API", "fastapi, python", "принимает команды, отдает инфрмацию об устройствах"){
+    Component(controller, "Api Controller", "fastapi Router", "")
+    Component(repo, "Repository", "class", "слой доступа к базе")
+}
+
+@enduml

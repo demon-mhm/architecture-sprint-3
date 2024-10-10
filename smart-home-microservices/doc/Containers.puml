@@ -1,0 +1,26 @@
+@startuml
+
+title Умный Дом Диаграмма Контейнеров
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь", "Пользователь системы Умный Дом")
+
+System(Server, "Умный дом", "управление подсистемaми умного дома") {
+    Container(api, "rest API", "fastapi, python", "принимает команды, отдает инфрмацию об устройствах")
+    ContainerQueue(queue, "Очередь", "kafka", "команды")
+    ContainerDb(db, "БД", "postgres", "данные подсистем")
+    Container(worker, "Воркер", "python, aiokafka", "управление устройствами")
+    Rel_Down(api, queue, "отправляет команды")
+    Rel_Down(queue, worker, "отправляет команды")
+    Rel_Right(api, db, "читает данные из")
+    Rel_Right(worker, db, "записывает данные в")
+}
+System_Boundary(House, "Дом") {
+    System_Ext(module, "Модуль", "управляет подсистемой")
+}
+
+Rel(user, api, "управляет подсистемами, просматривает показания с помощью")
+Rel(worker, module, "отправляет комманды, считывает состояния/показания")
+Rel(user, module, "устанавливает, обслуживает")
+
+@enduml

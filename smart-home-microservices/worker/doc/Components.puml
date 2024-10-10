@@ -1,0 +1,20 @@
+@startuml
+
+title Умный Дом Диаграмма Компонентов
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+
+ContainerQueue(queue, "очередь", "kafka", )
+Container(api, "rest API", "fastapi, python", "исполняет команды, считывает информацию с устройств"){
+    Component(worker, "worker", "python module", "")
+    Component(adapter, "Adapter[ModuleType]", "python module", "реализация логики управления модулем определенного типа")
+    Component(repo, "Repository", "class", "слой доступа к базе")
+    Rel_Down(worker, repo, "")
+}
+System_Ext(module, "модуль", "управляет подсистемой")
+ContainerDb(db, "БД", "postgres", )
+Rel_Down(repo, db, "пишет/читает в/из")
+Rel_Down(queue, worker, "ожидает сообщений из")
+Rel_Right(worker, module, "отправляет команды, получает телеметрию")
+@enduml
