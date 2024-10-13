@@ -1,0 +1,46 @@
+@startuml
+
+skinparam linetype ortho
+
+entity User {
+    * user_id: number <<generated>>
+}
+entity House{
+    * house_id: number <<generated>>
+    --
+    * user_id: <<FK>>
+}
+entity Module{
+    * mudule_id: number <<generated>>
+    --
+    * house_id: <<FK>>
+}
+entity Device {
+    * device_id: number <<generated>>
+    --
+    * module_id: <<FK>>
+    metadata 
+}
+entity Telemetry {
+    * telemetry_id: number <<generated>>
+    --
+    * device_id: <<FK>>
+    * timestamp
+    telemetry_data
+}
+entity Commands {
+    * command_id: number <<generated>>
+    --
+    * device_id: <<FK>>
+    * timestamp
+    command_data
+    command_result
+}
+
+Module |o-- Device
+Device |o-- Telemetry
+Device |o-- Commands
+House ||-- Module
+User |o-- House
+@enduml
+

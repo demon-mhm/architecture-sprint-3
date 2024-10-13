@@ -1,0 +1,83 @@
+openapi: '3.0.0'
+info:
+  title: Умный Дом
+  version: '1.0.0'
+paths:
+  /devices/{device_id}:
+    get:
+      summary: получить телеметрию устройства
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Telemetry'
+        "404":
+          description: Device not found
+        "403":
+          description: Forbidden
+  /devices:
+    put:
+      summary: отправить комманду устройству
+      description: Success
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Command'
+      responses:
+        '201':
+          description: Command added to queue
+        '304':
+          description: Command is already pending
+        "404":
+          description: Device not found
+        "403":
+          description: Forbidden
+
+components:
+  schemas:
+    Telemetry:
+      type: object
+      required:
+        - telemetry_id
+        - module_id
+        - house_id
+        - device_id
+        - timestamp
+        - telemetry_data
+      properties:
+        telemetry_id:
+          type: integer
+          format: int64
+        module_id:
+          type: integer
+          format: int64
+        house_id:
+          type: integer
+          format: int64
+        device_id:
+          type: integer
+          format: int64
+        timestamp:
+          type: string
+        telemetry_data:
+          type: object
+        pending_commands:
+          type: array
+          items:
+            $ref: '#/components/schemas/Command'
+    Command:
+      required:
+        - command_data
+      properties:
+        command_data:
+          type: object
+        timestamp:
+          type: string
+        device_id:
+          type: integer
+          format: int64
+        command_status:
+          type: string

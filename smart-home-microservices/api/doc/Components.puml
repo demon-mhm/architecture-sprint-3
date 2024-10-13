@@ -7,6 +7,8 @@ title Умный Дом Диаграмма Компонентов
 Container(api, "rest API", "fastapi, python", "принимает команды, отдает инфрмацию об устройствах"){
     Component(controller, "Api Controller", "fastapi Router", "")
     Component(repo, "Repository", "class", "слой доступа к базе")
+    Rel_Down(controller, repo, "")
 }
-
+ContainerDb(db, "БД", "postgres", )
+Rel_Down(repo, db, "читает из")
 @enduml

@@ -5,6 +5,7 @@ title Умный Дом Диаграмма Контекста
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
 Person(user, "Пользователь", "Пользователь системы Умный Дом")
+Person(support, "Сотрудник техподдежки",)
 
 System(Server, "Умный дом", "управление подсистемaми умного дома")
 System_Boundary(House, "Дом") {
@@ -12,6 +13,7 @@ System_Boundary(House, "Дом") {
 }
 
 Rel(user, Server, "управляет подсистемами, просматривает показания с помощью")
+Rel(support, Server, "оказывает техподдержку с помощью")
 Rel(Server, module, "отправляет комманды, считывает состояния/показания")
 Rel(user, module, "устанавливает, обслуживает")
 
