@@ -4,6 +4,12 @@
 
 ### Подзадание 1.1: Анализ и планирование
 
+Стратегический анализ текущего состояния:
+
+[diagrams/src/smart-home-monolith/Domain.puml](diagrams/src/smart-home-monolith/Domain.puml)
+
+![context](diagrams/out/smart-home-monolith/Domain.png)
+
 По результатам анализа требований, описанных в задании была создана C4 контекстная диаграмма:
 
 [diagrams/src/smart-home-monolith/Context.puml](diagrams/src/smart-home-monolith/Context.puml)
@@ -18,7 +24,7 @@
 
 [diagrams/src/smart-home-monolith/Components.puml](diagrams/src/smart-home-monolith/Components.puml)
 
-![containers](diagrams/out/smart-home-monolith/Components.png)
+![components](diagrams/out/smart-home-monolith/Components.png)
 
 ### Подзадание 1.2: Архитектура микросервисов
 
@@ -28,7 +34,11 @@
 
 ![containers](diagrams/out/smart-home-microservices/Container.png)
 
-Диаграмму кода решил не делать за недостатком времени. Она будет мало отличаться от существующео монолита, с тем только отличием что будет выполнена как три модульных монолита - воркер, хелпдеск и пользовательское апи. Т.к. текущие разработчики компании работают в стеке Java-Spring - не вижу обходимости переходить на другие технологии.
+[diagrams/src/smart-home-microservices/Components.puml](diagrams/src/smart-home-microservices/Components.puml)
+
+![components](diagrams/out/smart-home-microservices/Components.png)
+
+Диаграмму кода решил не делать за недостатком времени.
 
 ### Подзадание 1.3: ER-диаграмма
 
@@ -39,7 +49,7 @@
 
 ### Подзадание 1.4: Создание и документирование API
 
-Максимально упрощенное API, обеспечивающее работоспособность системы:
+Минималистичное API, обеспечивающее работоспособность CustomerService:
 [diagrams/src/openapi.yaml](diagrams/src/openapi.yaml)
 
 ```yaml
@@ -48,21 +58,68 @@ info:
   title: Умный Дом
   version: '1.0.0'
 paths:
-  /devices/{device_id}:
+  /:
     get:
-      summary: получить телеметрию устройства
+      summary: получить полную информацию о домах пользователя и привязанных к ним устройствах
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Telemetry'
+                $ref: '#/components/schemas/User'
+  /houses:
+    post:
+      summary: добавить дом
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/House'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+  /houses/{house_id}:
+    patch:
+      summary: изменить информацию о доме
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/House'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
         "404":
-          description: Device not found
+          description: House not found
         "403":
           description: Forbidden
-  /devices:
+    post:
+      summary: зарегистрировать новое устройство в доме
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+        "404":
+          description: House not found
+        "403":
+          description: Forbidden
     put:
       summary: отправить комманду устройству
       description: Success
@@ -83,36 +140,32 @@ paths:
 
 components:
   schemas:
-    Telemetry:
+    Device:
       type: object
       required:
-        - telemetry_id
-        - module_id
-        - house_id
-        - device_id
-        - timestamp
-        - telemetry_data
+        - metadata
       properties:
-        telemetry_id:
-          type: integer
-          format: int64
-        module_id:
-          type: integer
-          format: int64
-        house_id:
-          type: integer
-          format: int64
         device_id:
           type: integer
           format: int64
-        timestamp:
-          type: string
-        telemetry_data:
+        metadata:
           type: object
         pending_commands:
           type: array
           items:
             $ref: '#/components/schemas/Command'
+        telemetry:
+          $ref: '#/components/schemas/Telemetry'
+    Telemetry:
+      type: object
+      required:
+        - timestamp
+        - telemetry_data
+      properties:
+        timestamp:
+          type: string
+        telemetry_data:
+          type: object
     Command:
       required:
         - command_data
@@ -126,9 +179,28 @@ components:
           format: int64
         command_status:
           type: string
+    House:
+      required:
+        - title
+      properties:
+        house_id:
+          type: integer
+          format: it64
+        title:
+          type: string
+        devices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Device'
+    User:
+      properties:
+        houses:
+          type: array
+          items:
+            $ref: '#/components/schemas/House'
 ```
 
-Асинхронное апи для воркера:
+Асинхронное апи для DeviceConnectivity:
 [diagrams/src/asyncapi.yaml](diagrams/src/asyncapi.yaml)
 
 ```yaml
@@ -162,6 +234,7 @@ operations:
       $ref: '#/channels/commands'
 ```
 
+Апи для Helpdesk не стал описывать. В базе - это `CustomerService` API с той лишь разницей что сотрудники могут просматривать и редактировать данные обратившихся за техподдержкой пользователей, плюс, неизвестные возможности вроде сброса паролей доступа, которые не вошли в оописание системы
 
 # Базовая настройка для smart-home-monolith
 

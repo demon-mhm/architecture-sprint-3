@@ -1,0 +1,60 @@
+@startuml 
+
+title Умный Дом Диаграмма Компонетов
+
+top to bottom direction
+!include <C4/C4_Component>
+
+Person(user, "Пользователь")
+Person(employee, "Поддержка", "специалист техподдержки")
+
+System_Boundary(House, "Дом") {
+    System_Ext(module, "Модуль", "управляет подсистемами")
+}
+
+
+System(EcoSmartSystem, "Умный Дом") {
+    ContainerDb(db1, "database", "postgres", "состояния устройств, регистрационные данные")
+    ContainerDb(db2, "database", "postgres", "телеметрия, команды")
+    ContainerQueue(q, "queue", "kafka", "очередь команд")
+    Container(api, "CustomerService", "Fastapi app", "") {
+        Component(CustomerController, "CustomerController", "FastAPI router","обработка запросов пользователей")
+        Component(CustomerService, "CustomerService", "python module", "бизнес-логика")
+        Component(DeviceRepository, "DeviceRepository", "python, sqlalchemy, pydantic", "логика доступа к данным")
+        Component(TelemetryRepository, "TelemetryRepository", "python, sqlalchemy, pydantic", "логика доступа к данным")
+        Component(CommandQueue, "CommandQueue", "python, aiokafka, pydantic", "логика публикации команд")
+        Rel_Down(CustomerController, CustomerService, "вызовы бизнес-логики")
+        Rel_Down(CustomerService, DeviceRepository, "читает/пишет данные")
+        Rel_Down(CustomerService, TelemetryRepository, "читает данные")
+        Rel_Down(CustomerService, CommandQueue, "логика продьюсера")
+        Rel_Down(CommandQueue, q, "публикует комманды")
+        Rel_Down(DeviceRepository, db1, "читает/пишет пользовательские данные")
+        Rel_Down(TelemetryRepository, db2, "читает телеметрию")
+    }
+    Container(helpdesk, "HelpdeskService", "Fastapi app", "") {
+        Component(HelpdeskController, "HelpdeskController", "FastAPI router","хелпдеск")
+        Component(HelpdeskService, "HelpdeskService", "python module", "бизнес-логика")
+        Component(DeviceRepositoryAdmin, "DeviceRepositoryAdmin", "python, sqlalchemy, pydantic", "логика доступа к данным")
+        Rel_Down(HelpdeskController, HelpdeskService, "вызовы бизнес-логики")
+        Rel_Down(HelpdeskService, DeviceRepositoryAdmin, "читает/пишет данные")
+        Rel_Down(DeviceRepositoryAdmin, db1, "читает/пишет пользовательские данные")
+    }
+    Container(worker, "DeviceConnectivity", "python app", "") {
+        Component(Consumer, "Consumer", "python, aiokafka","процессинг очереди комманд")
+        Component(DeviceRepository2, "DeviceRepository", "python, sqlalchemy, pydantic", "логика доступа к данным")
+        Component(TelemetryRepository2, "TelemetryRepository", "python, sqlalchemy, pydantic", "логика доступа к данным")
+        Component(connector, "Connector[DeviceType]", "python, aiohttp?", "протокол, логика взаимодействия с устройствами")
+        Rel_Down(q, Consumer, "обрабатывает очередь сообщений")
+        Rel_Down(Consumer, DeviceRepository2, "пишет данные")
+        Rel_Down(Consumer, TelemetryRepository2, "пишет данные")
+        Rel_Down(Consumer, connector, "отправляет комманды, читает телеметрию")
+        Rel_Down(CommandQueue, q, "публикует комманды")
+        Rel_Down(DeviceRepository2, db1, "читает/пишет пользовательские данные")
+        Rel_Down(TelemetryRepository2, db2, "пишет телеметрию")
+    }
+}
+Rel_D(connector, House, "взаимодействует с устройствами")
+
+Rel(user, api, "управляет устройствами, просматривает показания с помощью")
+Rel(employee, helpdesk, "оказывает техподдержку с помощью")
+@enduml

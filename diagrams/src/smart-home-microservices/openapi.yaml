@@ -3,21 +3,68 @@ info:
   title: Умный Дом
   version: '1.0.0'
 paths:
-  /devices/{device_id}:
+  /:
     get:
-      summary: получить телеметрию устройства
+      summary: получить полную информацию о домах пользователя и привязанных к ним устройствах
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Telemetry'
+                $ref: '#/components/schemas/User'
+  /houses:
+    post:
+      summary: добавить дом
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/House'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+  /houses/{house_id}:
+    patch:
+      summary: изменить информацию о доме
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/House'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
         "404":
-          description: Device not found
+          description: House not found
         "403":
           description: Forbidden
-  /devices:
+    post:
+      summary: зарегистрировать новое устройство в доме
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+        "404":
+          description: House not found
+        "403":
+          description: Forbidden
     put:
       summary: отправить комманду устройству
       description: Success
@@ -38,36 +85,32 @@ paths:
 
 components:
   schemas:
-    Telemetry:
+    Device:
       type: object
       required:
-        - telemetry_id
-        - module_id
-        - house_id
-        - device_id
-        - timestamp
-        - telemetry_data
+        - metadata
       properties:
-        telemetry_id:
-          type: integer
-          format: int64
-        module_id:
-          type: integer
-          format: int64
-        house_id:
-          type: integer
-          format: int64
         device_id:
           type: integer
           format: int64
-        timestamp:
-          type: string
-        telemetry_data:
+        metadata:
           type: object
         pending_commands:
           type: array
           items:
             $ref: '#/components/schemas/Command'
+        telemetry:
+          $ref: '#/components/schemas/Telemetry'
+    Telemetry:
+      type: object
+      required:
+        - timestamp
+        - telemetry_data
+      properties:
+        timestamp:
+          type: string
+        telemetry_data:
+          type: object
     Command:
       required:
         - command_data
@@ -81,3 +124,22 @@ components:
           format: int64
         command_status:
           type: string
+    House:
+      required:
+        - title
+      properties:
+        house_id:
+          type: integer
+          format: it64
+        title:
+          type: string
+        devices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Device'
+    User:
+      properties:
+        houses:
+          type: array
+          items:
+            $ref: '#/components/schemas/House'

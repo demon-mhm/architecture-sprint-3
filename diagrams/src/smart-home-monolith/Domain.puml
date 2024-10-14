@@ -1,0 +1,17 @@
+@startuml
+title Умный дом стратегический анализ
+!include <C4/C4_Component>
+Boundary(d1, "Управление отоплением", "domain") {
+    Container(c1, "сбор телеметрии", "subdomain") {
+        Component(cm1, "Хранение данных", "context")
+        Component(cm2, "Протокол взаимодействия", "context")
+    }
+    Container(c1, "управление устройствами", "subdomain") {
+        Component(cm1, "синхронизация состояния", "context")
+        Component(cm2, "Протокол взаимодействия", "context")
+    }
+}
+Boundary(d2, "Установка и обслуживание устройств", "domain") {
+
+}
+@enduml

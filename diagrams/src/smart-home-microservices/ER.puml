@@ -37,10 +37,10 @@ entity Commands {
     command_result
 }
 
-Module |o-- Device
-Device |o-- Telemetry
-Device |o-- Commands
-House ||-- Module
-User |o-- House
+Module ||--o{ Device
+Device ||--o{ Telemetry
+Device ||--o{ Commands
+House ||--|| Module
+User ||--o{ House
 @enduml
 
