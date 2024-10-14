@@ -1,0 +1,28 @@
+asyncapi: 3.0.0
+info:
+  title: Умный дом, управление устройствами
+  version: '1.0.0'
+  description: Асинхронная отправка команд модулям умного дома
+servers:
+  sarthome:
+    host: localhost
+    protocol: tcp
+channels:
+  commands:
+    address: 'commands'
+    messages:
+      deviceCommand:
+        name: DeviceCommand
+        payload:
+          type: object
+          properties:
+            device_id:
+              type: integer
+            command_data:
+              type: object
+operations:
+  onCommandReceived:
+    action: 'send'
+    summary: Отправить команду для устройства модулю
+    channel:
+      $ref: '#/channels/commands'

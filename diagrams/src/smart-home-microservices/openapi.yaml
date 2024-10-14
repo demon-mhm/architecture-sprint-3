@@ -1,0 +1,145 @@
+openapi: '3.0.0'
+info:
+  title: Умный Дом
+  version: '1.0.0'
+paths:
+  /:
+    get:
+      summary: получить полную информацию о домах пользователя и привязанных к ним устройствах
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /houses:
+    post:
+      summary: добавить дом
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/House'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+  /houses/{house_id}:
+    patch:
+      summary: изменить информацию о доме
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/House'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+        "404":
+          description: House not found
+        "403":
+          description: Forbidden
+    post:
+      summary: зарегистрировать новое устройство в доме
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+        "404":
+          description: House not found
+        "403":
+          description: Forbidden
+    put:
+      summary: отправить комманду устройству
+      description: Success
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Command'
+      responses:
+        '201':
+          description: Command added to queue
+        '304':
+          description: Command is already pending
+        "404":
+          description: Device not found
+        "403":
+          description: Forbidden
+
+components:
+  schemas:
+    Device:
+      type: object
+      required:
+        - metadata
+      properties:
+        device_id:
+          type: integer
+          format: int64
+        metadata:
+          type: object
+        pending_commands:
+          type: array
+          items:
+            $ref: '#/components/schemas/Command'
+        telemetry:
+          $ref: '#/components/schemas/Telemetry'
+    Telemetry:
+      type: object
+      required:
+        - timestamp
+        - telemetry_data
+      properties:
+        timestamp:
+          type: string
+        telemetry_data:
+          type: object
+    Command:
+      required:
+        - command_data
+      properties:
+        command_data:
+          type: object
+        timestamp:
+          type: string
+        device_id:
+          type: integer
+          format: int64
+        command_status:
+          type: string
+    House:
+      required:
+        - title
+      properties:
+        house_id:
+          type: integer
+          format: it64
+        title:
+          type: string
+        devices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Device'
+    User:
+      properties:
+        houses:
+          type: array
+          items:
+            $ref: '#/components/schemas/House'

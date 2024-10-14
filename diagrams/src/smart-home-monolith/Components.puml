@@ -1,0 +1,31 @@
+@startuml 
+
+title Умный Дом Диаграмма Контейнеров
+
+top to bottom direction
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Person(specialist, "Специалист", "")
+Person(user, "Пользователь", "")
+
+System_Boundary(House, "Дом") {
+    System_Ext(sensor, "Датчик", "измеряет показания")
+    System_Ext(relay, "Реле", "управляет отопительными приборами")
+}
+
+System(EcoSmartSystem, "Умный Дом") {
+    Container(api, "Rest API", "Java, Spring", "") {
+        Component(HeatingSystemController, "HeatingSystemController", "обработка запросов пользователей")
+        Component(HeatingSystemService, "HeatingSystemService", "бизнес-логика")
+        Component(HeatingSystemRepository, "HeatingSystemRepository", "логика доступа к данным")
+        Rel_Down(HeatingSystemController, HeatingSystemService, "вызовы бизнес-логики")
+        Rel_Down(HeatingSystemService, HeatingSystemRepository, "читает/пишет данные")
+    }
+    ContainerDb(db, "database", "postgres", "устройства, телеметрия")
+    Rel_Down(HeatingSystemRepository, db, "читает/пишет пользовательские данные")
+}
+
+Rel(user, api, "управляет температурой, просматривает показания с помощью")
+Rel(specialist, sensor, "устанавливает, обслуживает")
+Rel(specialist, relay, "устанавливает, обслуживает")
+@enduml

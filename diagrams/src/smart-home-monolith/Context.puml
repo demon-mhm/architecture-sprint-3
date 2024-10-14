@@ -1,0 +1,22 @@
+@startuml
+
+title Умный Дом Диаграмма Контекста
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(specialist, "Специалист", "Специалист по установке и настройке оборудования")
+Person(user, "Пользователь", "Пользователь системы Умный Дом")
+
+System(Server, "Умный дом", "управление отоплением в доме и проверка температуры")
+System_Boundary(House, "Дом") {
+    System_Ext(sensor, "Датчик", "измеряет температуру")
+    System_Ext(relay, "Реле", "управляет отопительными приборами")
+}
+
+Rel(user, Server, "управляет температурой, просматривает показания с помощью")
+Rel(specialist, sensor, "устанавливает, обслуживает")
+Rel(specialist, relay, "устанавливает, обслуживает")
+Rel(Server, sensor, "просматривает температуру с помощью")
+Rel(Server, relay, "управляет температурой с помощью")
+
+@enduml

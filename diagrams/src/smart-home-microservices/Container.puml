@@ -1,0 +1,32 @@
+@startuml
+
+title Умный Дом Диаграмма Контейнеров
+!include <C4/C4_Container>
+
+Person(user, "Пользователь", "Пользователь системы Умный Дом")
+Person(employee, "Поддержка", "специалист техподдержки")
+
+System(Server, "Умный дом", "управление подсистемaми умного дома") {
+    Container(apigateway, "API gateway", "kusk", "доступ к апи, роутинг, балансиировка")
+    Container(api, "rest API", "fastapi, python", "постановка пользовательских команд в очередь на исполнение, чтение телеметрии")
+    Container(helpdesk, "rest API", "fastapi, python", "решение проблем с подключением и конфигурацией устройстив")
+    ContainerQueue(queue, "Очередь", "kafka", "команды")
+    ContainerDb(db, "БД", "postgres", "данные подсистем")
+    Container(worker, "Воркер", "python, aiokafka", "управление устройствами")
+    Rel_Down(api, queue, "отправляет команды")
+    Rel_Down(queue, worker, "отправляет команды")
+    Rel_Right(api, db, "читает данные из")
+    Rel_Right(worker, db, "записывает данные в")
+}
+System_Boundary(House, "Дом") {
+    System_Ext(module, "Модуль", "управляет подсистемой")
+}
+
+Rel(user, apigateway, "получает услуги с помощью")
+Rel(employee, helpdesk, "работает с системой с помощью")
+Rel(apigateway, helpdesk, "предоставляет доступ к")
+Rel(apigateway, api, "предоставляет доступ к")
+Rel(worker, module, "отправляет комманды, считывает состояния/показания")
+Rel(user, module, "устанавливает, обслуживает")
+
+@enduml
